@@ -4,7 +4,7 @@
 
 - Understand the React build process and how to serve a React app from Flask.
 - Understand challenges of client-side routing in a deployed application.
-- Deploy a Flask API with a React frontend to Render.
+- Deploy a full-stack Flask-React application to Render.
 
 ***
 

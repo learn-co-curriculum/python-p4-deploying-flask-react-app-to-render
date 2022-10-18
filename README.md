@@ -1,4 +1,4 @@
-# Deploying a Flask-React App to Heroku
+# Deploying a Flask-React App to Render
 
 ## Learning Goals
 
@@ -41,7 +41,7 @@ together on a single server.
 ## Setup
 
 To follow along with this lesson, we have a pre-built Flask-React application
-that you'll be deploying to Heroku. To start, **fork** this repo from Canvas.
+that you'll be deploying to Render. To start, **fork** this repo from Canvas.
 
 After downloading the code, set up the repository locally:
 

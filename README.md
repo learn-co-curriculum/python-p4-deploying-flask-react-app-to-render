@@ -105,9 +105,9 @@ environments.
 When working in the **development** environment, a typical workflow for adding
 new features to a React application is something like this:
 
-- Run `npm start` to run a development server
-- Make changes to the app by editing the files
-- View those changes in the browser
+- Run `npm start` to run a development server.
+- Make changes to the app by editing the files.
+- View those changes in the browser.
 
 To enable this _excellent_ developer experience, Create React App uses
 [webpack](https://webpack.js.org/) under the hood to create a development server
@@ -122,11 +122,11 @@ application is to get it into the hands of our users via our website. For our
 app to run in production, we have a different set of needs:
 
 - **Build** the static HTML, JavaScript and CSS files needed to run our app in
-  the browser, keeping them as small as possible
+  the browser, keeping them as small as possible.
 - **Serve** the application's files from a server hosted online, rather than a
-  local webpack development server
+  local webpack development server.
 - Don't show any error messages/warnings that are meant for developers rather
-  than our website's users
+  than our website's users.
 
 ### Building a Static React App
 

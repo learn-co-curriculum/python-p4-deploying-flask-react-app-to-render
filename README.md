@@ -40,7 +40,7 @@ together on a single server.
 
 ## Setup
 
-To follow along with this lesson, we have a pre-built React-Rails application
+To follow along with this lesson, we have a pre-built Flask-React application
 that you'll be deploying to Heroku. To start, **fork** this repo from Canvas.
 
 After downloading the code, set up the repository locally:
@@ -50,10 +50,9 @@ $ npm install --prefix client
 $ pipenv install && pipenv shell
 ```
 
-Create a `.env` file at root and add the following variables:
+Create a `.env` file at root and add the following variable:
 
 ```txt
-API_URL=http://0.0.0.0:5555
 DATABASE_URI=postgresql://{retrieve this from from render}
 ```
 
@@ -134,7 +133,7 @@ When developing the frontend of a site using Create React App, our ultimate goal
 is to create a **static site** consisting of pre-built HTML, JavaScript, and CSS
 files, which can be served by Flask when a user makes a request to the server to
 view our frontend. To demonstrate this process of **building** the production
-version of our React app and **serving** it from the Rails app, follow these
+version of our React app and **serving** it from the Flask app, follow these
 steps.
 
 **1.** Build the production version of our React app:
@@ -206,121 +205,84 @@ how to deploy the application to Render.
 
 ***
 
-## Heroku Build Process
+## Render Build Process
 
 Think about the steps to build our React application locally. What did we have
 to do to build the React application in such a way that it could be served by
-our Rails application? Well, we had to:
+our Flask application? Well, we had to:
 
-- Run `npm install --prefix client` to install any dependencies
-- Use `npm run build --prefix client` to create the production app
-- Move the code from the `client/build` folder to the `public` folder
-- Run `rails s`
+- Run `npm install --prefix client` to install any dependencies.
+- Use `npm run build --prefix client` to create the production app.
+- Install `pip` dependencies for the Flask app.
+- Run `gunicorn --chdir server app:app` to run the Flask server.
 
 We would also need to repeat these steps any time we made any changes to the
 React code, i.e., to anything in the `client` folder. Ideally, we'd like to be
-able to **automate** those steps when we deploy this app to Heroku, so we can
-just push up new versions of our code to Heroku and deploy them like we were
+able to **automate** those steps when we deploy this app to Render, so we can
+just push up new versions of our code to Render and deploy them like we were
 able to do in the previous lesson.
 
-Thankfully, Heroku lets us do just that! Let's get started with the deploying
+Thankfully, Render lets us do just that! Let's get started with the deploying
 process and talk through how this automation works.
 
-First, in the demo project directory, create a new app on Heroku:
+Commit all of your work to your fork on GitHub and copy the project URL.
+
+Navigate to [your Render dashboard][https://dashboard.render.com] and create
+a new web service. Find your forked repository through "Connect a repository"
+or search by the copied URL under "Public Git repository."
+
+Change your "Build Command" to the following:
 
 ```console
-$ heroku create
+$ pip install -r requirements.txt && npm install --prefix client && npm run build
 ```
 
-Next, we'll need to tell Heroku that this project is not **just** a Rails
-project; we'll need to run some **NodeJS** code as well in order to execute the
-build scripts for our React application. We can do this via Heroku
-[buildpacks][buildpacks]:
+Change your "Start Command" to the following:
 
 ```console
-$ heroku buildpacks:add heroku/nodejs --index 1
-$ heroku buildpacks:add heroku/ruby --index 2
+$ gunicorn --chdir server app:app
 ```
 
-This will tell Heroku to first run a build script for our React app using NodeJS
-before running the build script for our Rails app (running `bundle install` and
-`rails s`).
+These commands will:
 
-To deploy the app, just like before, run:
+- Install any Python dependencies with `pip`.
+- Install any Node dependencies with `npm`.
+- Build your static site with `npm`.
+- Run your Flask server.
 
-```console
-$ git push heroku main
+Once you have saved these changes, navigate to the "Environment" tab and make
+sure the following values are set:
+
+```txt
+DATABASE_URI=postgresql://{retrieve this from from render}
+PYTHON_VERSION=3.8.13
 ```
 
-This will kick off the build process on Heroku for the React app, then the Rails
-app next. You should be able to visit the deployed site now and see the full
-project live on the internet!
+Click "Save Changes" and wait for a few minutes. Navigate to "Events" to check
+for progress and errors. When Render tells you the site is "Live", navigate to
+your site URL and view Birdsy in all its glory!
 
-To explain the React build process further: we have defined a NodeJS build
-process for the React app in the `package.json` file in the **root** directory
-of this project. It looks like this:
-
-```json
-{
-  "name": "phase-4-deploying-app-demo",
-  "description": "Build scripts for Heroku",
-  "engines": {
-    "node": "16.x"
-  },
-  "scripts": {
-    "clean": "rm -rf public",
-    "build": "npm install --prefix client && npm run build --prefix client",
-    "deploy": "cp -a client/build/. public/",
-    "heroku-postbuild": "npm run clean && npm run build && npm run deploy"
-  }
-}
-```
-
-In this file, the `heroku-postbuild` script is the one that will run in Heroku
-when we deploy the app. This is the script that automates the steps we outlined
-above for building the React app. If you take a closer look at exactly what that
-script does, you'll see that it's simply calling each of the other three scripts
-we've defined. These scripts run a series of commands to:
-
-- Clean up any old files in the public directory
-- Install dependencies and build the React app
-- Move the built React app to the `public` folder
-
-A big part of the deployment process is automating features like this to make
-future deployments easier. We could have handled this process manually by
-running some additional commands on the Heroku server after deploying, but then
-we (or other developers) would need to remember to run those same steps any time
-changes are made to the React app.
+***
 
 ## Conclusion
 
 Creating a website out of multiple applications working together adds a
 significant amount of complexity when it comes time to deploy our application.
 The upside to this approach is we get to leverage the strengths of each of the
-tools we're using: React for a speedy, responsive user interface, and Rails for
+tools we're using: React for a speedy, responsive user interface, and Flask for
 a robust, well-designed backend to communicate with the database.
 
 By spending some time upfront to understand and automate parts of the deployment
 process, we can make future deployments simpler.
 
-For your future projects using a React frontend and Rails API backend, we'll
+For your code challenges using a React frontend and Flask API backend, we'll
 provide a template project to use so you don't have to worry about configuring
 the tricky parts of the deployment process yourself. However, it's helpful to
 have an understanding of this configuration should you wish to customize it
 or troubleshoot issues related to deployments in the future.
 
-## Check For Understanding
-
-Before you move on, make sure you can answer the following questions:
-
-1. Why does deploying the production version of our Rails/React app lead to
-   routing problems? How can we modify our routes to fix the issue?
-2. How does adding a NodeJS build process to the `package.json` file help us?
-
 ## Resources
 
-- [Heroku Rails-React Setup](https://blog.heroku.com/a-rock-solid-modern-web-stack)
-- [Demo App](https://github.com/learn-co-curriculum/phase-4-deploying-demo-app)
-
-[buildpacks]: https://devcenter.heroku.com/articles/using-multiple-buildpacks-for-an-app
-[namespacing]: https://guides.rubyonrails.org/routing.html#controller-namespaces-and-routing
+- [Deploy a Flask App - Render](https://render.com/docs/deploy-flask)
+- [Deployment - Create React App](https://create-react-app.dev/docs/deployment/#:~:text=npm%20run%20build%20creates%20a,.js%20file.)
+- [JavaScript, `fetch`, and JSON - Pallets](https://flask.palletsprojects.com/en/2.2.x/patterns/javascript/)

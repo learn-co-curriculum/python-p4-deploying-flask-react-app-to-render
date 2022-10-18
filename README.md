@@ -1,4 +1,4 @@
-# Deploying a Rails-React App to Heroku
+# Deploying a Flask-React App to Heroku
 
 ## Learning Goals
 
@@ -32,7 +32,7 @@ In the previous lesson, we deployed a small Flask API application to Render to
 learn how the deployment process works in general, and what steps are required
 to take the code from our machine and get it to run on a server.
 
-In this lesson, we'll be tackling a more complex app with a modern React-Flask
+In this lesson, we'll be tackling a more complex app with a modern Flask-React
 stack, and explore some of the challenges of getting these two apps to run
 together on a single server.
 
@@ -41,32 +41,60 @@ together on a single server.
 ## Setup
 
 To follow along with this lesson, we have a pre-built React-Rails application
-that you'll be deploying to Heroku. To start, head to this link, and **fork**
-and **clone** the repository there:
-
-- [https://github.com/learn-co-curriculum/phase-4-deploying-demo-app](https://github.com/learn-co-curriculum/phase-4-deploying-demo-app)
+that you'll be deploying to Heroku. To start, **fork** this repo from Canvas.
 
 After downloading the code, set up the repository locally:
 
 ```console
-$ bundle install
-$ rails db:create db:migrate db:seed
 $ npm install --prefix client
+$ pipenv install && pipenv shell
 ```
 
-This application has a Rails API with session-based authentication, a React
-frontend using React Router for client-side routing, and Postgresql for the
-database.
+Create a `.env` file at root and add the following variables:
 
-You can run the app locally (assuming you have the Heroku CLI installed) with:
+```txt
+API_URL=http://0.0.0.0:5555
+DATABASE_URI=postgresql://{retrieve this from from render}
+```
+
+We've installed a new package in this repository called `python-dotenv`. It
+allows us to set environment variables when we run our application using `.env`
+files. This is a nice midway point between setting invisible environment
+variables from the command line and writing hidden values into our code.
+
+To generate these environment variables, we just need to run the following
+command at the beginning of the module:
+
+```py
+from dotenv import load_dotenv
+load_dotenv()
+```
+
+After this, we can import any of our `.env` variables with `os.environ.get()`.
+
+Run the following commands to install upgrade and seed our database:
 
 ```console
-$ heroku local -f Procfile.dev
+$ cd server
+$ flask db upgrade
+$ python seed.py
+```
+
+This application has a RESTful Flask API, a React
+frontend using React Router for client-side routing, and PostgreSQL for the
+database.
+
+You can now run the app locally with:
+
+```console
+$ honcho start -f Procfile.dev
 ```
 
 Spend some time familiarizing yourself with the code for the demo app before
 proceeding. We'll be walking through its setup and why certain choices were
 made through the course of this lesson.
+
+***
 
 ## React Production Build
 

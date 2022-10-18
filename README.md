@@ -132,7 +132,7 @@ app to run in production, we have a different set of needs:
 
 When developing the frontend of a site using Create React App, our ultimate goal
 is to create a **static site** consisting of pre-built HTML, JavaScript, and CSS
-files, which can be served by Rails when a user makes a request to the server to
+files, which can be served by Flask when a user makes a request to the server to
 view our frontend. To demonstrate this process of **building** the production
 version of our React app and **serving** it from the Rails app, follow these
 steps.
@@ -152,26 +152,41 @@ directory! This is because of that **bundling** and **minification** process:
 taking the source code you wrote, along with any external JavaScript libraries
 your code depends on, and squishing it as small as possible.
 
-**2.** Move our static frontend files to the `/public directory`:
+**2.** Add static routes to Flask:
 
-```console
-$ mv client/build/* public
+If you check `app.py`, you will see that the following additions have been made
+since you last saw the bird API:
+
+```py
+app = Flask(
+    __name__,
+    static_url_path='',
+    static_folder='../client/build',
+    template_folder='../client/build'
+)
+
+...
+
+@app.route('/')
+def index():
+    return render_template("index.html")
+
 ```
 
-This command will move all of the files and folders that are inside the
-`client/build` directory into to the `public` directory. The `public` directory
-is used by Rails to serve **static** assets, so when we run the Rails server, it
-will be able to display the files from our production version of the React
-application. When a user visits `http://localhost:3000`, Rails will return the
-`index.html` file from this directory.
+These configure our Flask app for where to search for static and template files-
+both in our `client/build/` directory- and sets up an index page at `/` to show
+all of the site's static files. As this app ("Birdsy", as we've called it) is
+a single-page web application, we only need to define one route. If there were
+a separate "Contact" or "About Us" page, we would need to configure routes for
+those as well.
 
-**3.** Run the Rails server:
+**3.** Run the Flask server:
 
 ```console
-$ rails s
+$ gunicorn --chdir server app:app
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) in the browser. You should
+Visit [http://localhost:8000](http://localhost:8000) in the browser. You should
 see the production version of the React application!
 
 Explore the React app in the browser using the React dev tools. What differences
@@ -185,101 +200,11 @@ version you're more familiar with.
 There is one other issue with our React application to dive into before we deploy
 it: how can we deal with client-side routing?
 
-### Configuring Rails for Client-Side Routing
-
-In our React application, we're using React Router to handle client-side
-routing. Client-side routing means that a user should be able to navigate to the
-React application, load all the HTML/CSS/JavaScript code just **once**, and then
-click through links in our site to navigate to different pages without making
-another request to the server for a new HTML document.
-
-We have two client-side routes defined:
-
-```jsx
-// client/src/components/App.js
-<Switch>
-  <Route path="/new">
-    <NewRecipe user={user} />
-  </Route>
-  <Route path="/">
-    <RecipeList />
-  </Route>
-</Switch>
-```
-
-When we run the app using `npm start` and webpack is handling the React server,
-it can handle these client-side routing requests just fine! **However**, when
-we're running React within the Rails application, we also have routes defined
-for our Rails API, and Rails will be responsible for all the routing logic in
-our application. So let's think about what will happen from the point of view of
-**Rails** when a user makes a request to these routes.
-
-- `GET /`: Rails will respond with the `public/index.html` file
-- `GET /new`: Rails will look for a `GET /new` route in the `config/routes.rb`
-  file. If we don't have this route defined, it will return a 404 error.
-
-Any other client-side routes we define in React will have the same issue as
-`/new`: since Rails is handling the routing logic, it will look for routes
-defined in the `config/routes.rb` file to determine how to handle all requests.
-
-We can solve this problem by setting up a **custom route** in our Rails
-application, and handle any requests that come through that **aren't** requests
-for our API routes by returning the `public/index.html` file instead.
-
-Here's how it works:
-
-```rb
-# config/routes.rb
-Rails.application.routes.draw do
-  namespace :api do
-    resources :recipes, only: [:index, :create]
-    post "/signup", to: "users#create"
-    get "/me", to: "users#show"
-    post "/login", to: "sessions#create"
-    delete "/logout", to: "sessions#destroy"
-  end
-
-  get "*path", to: "fallback#index", constraints: ->(req) { !req.xhr? && req.format.html? }
-end
-```
-
-All the routes for our API are defined **first** in the `routes.rb` file. We use
-the [namespacing][] to differentiate the API requests from other requests.
-
-The last method in the `routes.rb` file handles all other `GET` requests by
-sending them to a special `FallbackController` with an `index` action:
-
-```rb
-# app/controllers/fallback_controller.rb
-class FallbackController < ActionController::Base
-  def index
-    render file: 'public/index.html'
-  end
-end
-```
-
-This action has just one job: to render the HTML file for our React application!
-
-> **Note**: It's important that this `FallbackController` inherits from
-> `ActionController::Base` instead of `ApplicationController`, which is what
-> your API controllers inherit from. Why? The `ApplicationController` class in a
-> Rails API inherits from the
-> [`ActionController::API` class][actioncontroller api], which doesn't include
-> the methods for rendering HTML. For our other controllers, this isn't a
-> problem, since they only need to render JSON responses. But for the
-> `FallbackController`, we need the ability to render an HTML file for our React
-> application.
-
-[actioncontroller api]: https://api.rubyonrails.org/classes/ActionController/API.html
-
-Experiment with the code above. Run `rails s` to run the application. Try
-commenting out the last line of the `routes.rb` file, and visit
-[http://localhost:3000/new](http://localhost:3000/new). You should see a 404
-page. Comment that line back in, and make the same request. Success!
-
 Now that you've seen how to create a production version of our React app
-locally, and tackled some thorny client-side routing issues, let's talk about
-how to deploy the application to Heroku.
+locally and integrated it with Flask, let's talk about
+how to deploy the application to Render.
+
+***
 
 ## Heroku Build Process
 

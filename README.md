@@ -185,6 +185,9 @@ client has more than one configured route- the client still handles the routing
 through clicks and form submissions, but with this configuration, Flask can find
 the resources by URL as well.
 
+> **NOTE: `index()` is given a default `id` of 0 because the `/` route will not
+> pass any value for `id`. This would result in a `TypeError`.**
+
 **3.** Run the Flask server:
 
 ```console
@@ -237,7 +240,7 @@ or search by the copied URL under "Public Git repository."
 Change your "Build Command" to the following:
 
 ```console
-$ pip install -r requirements.txt && npm install --prefix client && npm run build
+$ pip install -r requirements.txt && npm install --prefix client && npm run build --prefix client
 ```
 
 Change your "Start Command" to the following:

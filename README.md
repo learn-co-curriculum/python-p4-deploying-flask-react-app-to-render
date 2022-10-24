@@ -41,7 +41,8 @@ together on a single server.
 ## Setup
 
 To follow along with this lesson, we have a pre-built Flask-React application
-that you'll be deploying to Render. To start, **fork** this repo from Canvas.
+that you'll be deploying to Render. To start, [**fork** this repo from GitHub](
+https://github.com/learn-co-curriculum/python-p4-deployment-bird-app/fork).
 
 After downloading the code, set up the repository locally:
 
@@ -65,6 +66,8 @@ To generate these environment variables, we just need to run the following
 command at the beginning of the module:
 
 ```py
+# server/app.py
+
 from dotenv import load_dotenv
 load_dotenv()
 ```
@@ -167,17 +170,20 @@ app = Flask(
 ...
 
 @app.route('/')
-def index():
+@app.route('/<int:id>')
+def index(id=0):
     return render_template("index.html")
 
 ```
 
 These configure our Flask app for where to search for static and template files-
 both in our `client/build/` directory- and sets up an index page at `/` to show
-all of the site's static files. As this app ("Birdsy", as we've called it) is
-a single-page web application, we only need to define one route. If there were
-a separate "Contact" or "About Us" page, we would need to configure routes for
-those as well.
+all of the site's static files.
+
+We also set up a second route here: `/<int:id>`. This lets Flask know that the
+client has more than one configured route- the client still handles the routing
+through clicks and form submissions, but with this configuration, Flask can find
+the resources by URL as well.
 
 **3.** Run the Flask server:
 
@@ -195,9 +201,6 @@ in development mode?
 Now you've seen how to build a production version of the React application
 locally, and some of the differences between this version and the development
 version you're more familiar with.
-
-There is one other issue with our React application to dive into before we deploy
-it: how can we deal with client-side routing?
 
 Now that you've seen how to create a production version of our React app
 locally and integrated it with Flask, let's talk about

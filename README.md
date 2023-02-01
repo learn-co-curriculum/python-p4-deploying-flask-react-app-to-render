@@ -264,9 +264,11 @@ DATABASE_URI=postgresql://{retrieve this from from render}
 PYTHON_VERSION=3.8.13
 ```
 
-Click "Save Changes" and wait for a few minutes. Navigate to "Events" to check
-for progress and errors. When Render tells you the site is "Live", navigate to
-your site URL and view Birdsy in all its glory!
+Click "Save Changes" and wait for a while. (Render's free tier can take up to
+an hour to get everything set up, so you might want to grab a bagel and coffee
+while you wait.) Navigate to "Events" to check for progress and errors. When
+Render tells you the site is "Live", navigate to your site URL and view Birdsy
+in all its glory!
 
 ***
 

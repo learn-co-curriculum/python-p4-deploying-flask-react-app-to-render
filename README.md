@@ -6,7 +6,7 @@
 - Understand challenges of client-side routing in a deployed application.
 - Deploy a full-stack Flask-React application to Render.
 
-***
+---
 
 ## Key Vocab
 
@@ -24,7 +24,7 @@
   cost. Some PaaS solutions, such as Render, provide free tiers for small
   applications.
 
-***
+---
 
 ## Introduction
 
@@ -36,13 +36,12 @@ In this lesson, we'll be tackling a more complex app with a modern Flask-React
 stack, and explore some of the challenges of getting these two apps to run
 together on a single server.
 
-***
+---
 
 ## Setup
 
 To follow along with this lesson, we have a pre-built Flask-React application
-that you'll be deploying to Render. To start, [**fork** this repo from GitHub](
-https://github.com/learn-co-curriculum/python-p4-deployment-bird-app/fork).
+that you'll be deploying to Render. To start, [**fork** this repo from GitHub](https://github.com/learn-co-curriculum/python-p4-deployment-bird-app/fork).
 
 After downloading the code, set up the repository locally:
 
@@ -96,7 +95,7 @@ Spend some time familiarizing yourself with the code for the demo app before
 proceeding. We'll be walking through its setup and why certain choices were
 made through the course of this lesson.
 
-***
+---
 
 ## React Production Build
 
@@ -169,24 +168,19 @@ app = Flask(
 
 ...
 
-@app.route('/')
-@app.route('/<int:id>')
-def index(id=0):
+@app.errorhandler(404)
+def not_found(e):
     return render_template("index.html")
 
 ```
 
 These configure our Flask app for where to search for static and template files-
-both in our `client/build/` directory- and sets up an index page at `/` to show
-all of the site's static files.
+both in our `client/build/` directory.
 
-We also set up a second route here: `/<int:id>`. This lets Flask know that the
-client has more than one configured route- the client still handles the routing
-through clicks and form submissions, but with this configuration, Flask can find
-the resources by URL as well.
+We also set up a catch-all here for any route that doesn't match those already defined on the server. This means when Flask receives a request,it will render the index.html that was generated to run the client application. The client still handles its own routing
+through clicks and form submissions, but with this configuration, Flask can find the resources by URL as well. This is important for when people refresh the page, or visit your site, either manually, from bookmarks, or an external link.
 
-> **NOTE: `index()` is given a default `id` of 0 because the `/` route will not
-> pass any value for `id`. This would result in a `TypeError`.**
+> **NOTE: Often, you may be setting up RESTful client-side routes, allowing people to go to `/birds` or `/birds/:id` to see all of the birds, or one at a time, respectively. These routes wouldn't be accessible on the frontend if they're already set up on the server (like they are in this app). To solve this, it's common to rewrite the backend routes so they all start with `/api/`, like `/api/birds` and `/api/birds/<int:id>` in order to free up the non-api urls to be used for client side routing. Just remember to also update your fetches to match backend urls.**
 
 **3.** Run the Flask server:
 
@@ -209,7 +203,7 @@ Now that you've seen how to create a production version of our React app
 locally and integrated it with Flask, let's talk about
 how to deploy the application to Render.
 
-***
+---
 
 ## Render Build Process
 
@@ -270,7 +264,7 @@ while you wait.) Navigate to "Events" to check for progress and errors. When
 Render tells you the site is "Live", navigate to your site URL and view Birdsy
 in all its glory!
 
-***
+---
 
 ## Conclusion
 

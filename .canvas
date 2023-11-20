@@ -4,3 +4,7 @@
   :course_id: 6130
   :canvas_url: https://learning.flatironschool.com/courses/6130/assignments/211760
   :type: assignment
+- :id: 297380
+  :course_id: 7560
+  :canvas_url: https://learning.flatironschool.com/courses/7560/pages/deploying-a-flask-react-app-to-render
+  :type: page
